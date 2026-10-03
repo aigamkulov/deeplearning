@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Deep Learning — Bosh sahifa{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-copy">
+    <span class="eyebrow">PYTHON · PYTORCH · MATHEMATICS</span>
+    <h1>Chuqur o‘rganish<br><em>amaliy laboratoriyasi</em></h1>
+    <p>Har bir topshiriq uchun masala sharti, matematik formulalar, algoritm, Python kodi va interaktiv natija bitta joyda.</p>
+    <div class="hero-actions"><a href="#topics" class="btn primary">▶ Mavzularni boshlash</a><a href="{{ url_for('admin') }}" class="btn ghost">＋ Mavzu / masala qo‘shish</a></div>
+  </div>
+  <div class="hero-art"><div class="neuron">🧠</div><div class="orb orb1"></div><div class="orb orb2"></div><div class="stat"><b>{{ topics|length }}</b><span>Mavzu</span></div><div class="stat stat2"><b>{{ metadata|length }}</b><span>Masala</span></div></div>
+</section>
+
+<div class="stats-row">
+  <div><span>📚</span><b>{{ topics|length }}</b><small>Mavzular</small></div>
+  <div><span>✓</span><b>{{ metadata|length }}</b><small>Amaliy masala</small></div>
+  <div><span>⌘</span><b>Python</b><small>Interaktiv kod</small></div>
+  <div><span>∑</span><b>MathJax</b><small>Formulalar</small></div>
+</div>
+
+<section id="topics" class="section">
+  <div class="section-heading"><div><span class="eyebrow">KURS TUZILMASI</span><h2>Mavzular</h2></div><a class="text-link" href="{{ url_for('admin') }}">Boshqarish →</a></div>
+  <div class="modern-topic-grid">
+  {% for tid,topic in topics.items()|sort %}
+    {% set exs=topic_exercises[tid] %}
+    <a class="modern-topic-card card-{{ loop.index%4 }}" href="{{ url_for('topic',topic_id=tid) }}">
+      <div class="topic-card-top"><span class="big-icon">{{ topic.icon }}</span><span class="topic-badge">{{ topic.title }}</span></div>
+      <h3>{{ topic.subtitle }}</h3><p>{{ topic.description }}</p>
+      <div class="progress-meta"><span>{{ exs|length }} ta topshiriq</span><span>→</span></div>
+      <div class="progress"><i style="width:{{ [exs|length*5,100]|min }}%"></i></div>
+    </a>
+  {% endfor %}
+  </div>
+</section>
+{% endblock %}

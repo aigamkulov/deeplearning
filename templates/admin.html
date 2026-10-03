@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Kontent boshqaruvi — Deep Learning{% endblock %}
+{% block content %}
+<div class="admin-hero"><div><span class="eyebrow">CONTENT MANAGEMENT</span><h1>O‘quv kontentini boshqaring</h1><p>Web sahifaning o‘zidan yangi mavzu va yangi masalalar qo‘shing. Saqlang — darhol kursda paydo bo‘ladi.</p></div><div class="admin-stat"><b>{{ total_exercises }}</b><span>masala</span></div></div>
+
+<div class="admin-grid">
+<section class="admin-panel"><div class="panel-title">📚 Yangi mavzu qo‘shish</div><form method="post" action="{{ url_for('add_topic') }}" class="form">
+<label>Mavzu belgisi <input name="icon" value="📚" maxlength="4"></label>
+<label>Mavzu nomi <input name="title" placeholder="3-MAVZU" required></label>
+<label>Mavzu sarlavhasi <input name="subtitle" placeholder="CNN va Computer Vision" required></label>
+<label>Tavsif <textarea name="description" rows="4" placeholder="Mavzu haqida qisqacha..."></textarea></label>
+<button class="btn primary full">＋ Mavzuni saqlash</button></form></section>
+
+<section class="admin-panel"><div class="panel-title">🧪 Yangi masala qo‘shish</div><form method="post" action="{{ url_for('add_exercise') }}" class="form">
+<div class="form-row"><label>Mavzu<select name="topic_id" required>{% for tid,t in topics.items()|sort %}<option value="{{ tid }}">{{ t.title }} — {{ t.subtitle }}</option>{% endfor %}</select></label><label>Raqam<input value="{{ next_number }}" disabled><small>Avtomatik belgilanadi</small></label></div>
+<label>Masala nomi<input name="title" placeholder="Masalan: Batch Normalization" required></label>
+<label>Qisqa tavsif<input name="description" placeholder="Masalaning qisqacha mazmuni"></label>
+<label>Masala sharti<textarea name="statement" rows="5" placeholder="To‘liq topshiriq shartini yozing..."></textarea></label>
+<label>Matematik formulalar <small>Har bir formulani yangi qatordan yozing. Masalan: \sigma(z)=1/(1+e^{-z})</small><textarea name="formulas" rows="5" placeholder="\\sigma(z)=...&#10;L=-\\frac1N\\sum_i..."></textarea></label>
+<label>Algoritm <small>Har bir qadamni yangi qatordan yozing.</small><textarea name="algorithm" rows="5" placeholder="Ma'lumotlarni tayyorlash.&#10;Forward hisoblash.&#10;Gradientni hisoblash."></textarea></label>
+
+<div class="detail-builder"><div class="detail-title">Formula → Python kodi <button type="button" class="add-detail" onclick="addFormulaDetail()">＋ Qator</button></div><div id="detailRows">
+<div class="detail-row"><input name="detail_formula" placeholder="Formula"><input name="detail_explanation" placeholder="Izoh"><textarea name="detail_code" placeholder="Python kodi"></textarea></div>
+</div></div>
+
+<label>Python kodi <small>Bu kod exercises/XX.py fayliga avtomatik saqlanadi.</small><textarea name="code" class="code-input" rows="18" required placeholder="import numpy as np&#10;&#10;print('Salom, Deep Learning!')"></textarea></label>
+<button class="btn primary full">＋ Masalani saqlash</button></form></section>
+</div>
+
+<section class="admin-panel topic-list-admin"><div class="panel-title">📋 Mavjud mavzular</div>
+<div class="admin-topic-list">
+{% for tid,t in topics.items()|sort %}
+<div class="admin-topic-row">
+  <span class="topic-icon">{{ t.icon }}</span>
+  <div class="admin-topic-info"><b>{{ t.title }}</b><p>{{ t.subtitle }}</p></div>
+  <div class="admin-actions">
+    <a class="btn small ghost" href="{{ url_for('topic',topic_id=tid) }}">Ko‘rish →</a>
+    <form method="post" action="{{ url_for('delete_topic', topic_id=tid) }}" onsubmit="return confirm('“{{ t.title }}” mavzusini o‘chirishni tasdiqlaysizmi? Mavzuga tegishli masalalar saqlanib qoladi.')">
+      <button class="btn small danger" type="submit">🗑 O‘chirish</button>
+    </form>
+  </div>
+</div>
+{% endfor %}
+</div></section>
+
+<section class="admin-panel exercise-list-admin">
+  <div class="panel-title">🧩 Mavjud masalalar</div>
+  <div class="admin-exercise-list">
+  {% for number, info in exercises %}
+    <div class="admin-exercise-row">
+      <div class="exercise-number">{{ number }}</div>
+      <div class="admin-exercise-info">
+        <b>{{ info.title }}</b>
+        <p>{{ info.description }}</p>
+      </div>
+      <div class="admin-actions">
+        <a class="btn small ghost" href="{{ url_for('exercise', number=number, topic=(info.topic_ids[0] if info.topic_ids else 1)) }}">Ko‘rish →</a>
+        <form method="post" action="{{ url_for('delete_exercise', number=number) }}" onsubmit="return confirm('{{ number }}-masalani o‘chirishni tasdiqlaysizmi? Python fayli ham o‘chiriladi.')">
+          <button class="btn small danger" type="submit">🗑 O‘chirish</button>
+        </form>
+      </div>
+    </div>
+  {% else %}
+    <div class="empty"><div>🧩</div><p>Hozircha masalalar yo‘q.</p></div>
+  {% endfor %}
+  </div>
+</section>
+{% endblock %}

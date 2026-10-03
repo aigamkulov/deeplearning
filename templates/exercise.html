@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}{{ number }}. {{ info.get('title','Masala') }}{% endblock %}
+{% block content %}
+<div class="crumb"><a href="{{ url_for('topic',topic_id=topic_id) }}">{{ topic.title }}</a> / {{ number }}-masala</div>
+<section class="exercise-head"><div><span class="eyebrow">{{ topic.title }} · AMALIY MASALA</span><h1>{{ number }}. {{ info.get('title',number~'.py') }}</h1><p>{{ info.get('description','Python kodi va amaliy yechim.') }}</p></div><button class="btn ghost" id="copyBtn" onclick="copyCode()">⧉ Kodni nusxalash</button></section>
+
+{% if info.get('statement') %}
+<section class="lesson-panel"><div class="panel-title">📖 Masala sharti</div><div class="statement">{{ info.statement|replace('\n','<br>')|safe }}</div></section>
+{% endif %}
+
+{% if info.get('formulas') %}
+<section class="lesson-panel"><div class="panel-title">∑ Matematik formulalar</div><div class="formula-grid">{% for formula in info.formulas %}<div class="formula">\( {{ formula }} \)</div>{% endfor %}</div></section>
+{% endif %}
+
+{% if info.get('formula_details') %}
+<section class="lesson-panel"><div class="panel-title">🐍 Formula → Python kodi</div><p class="muted">Formulaning dasturda aynan qanday ifodalanganini ko‘ring.</p>
+<div class="formula-details">{% for item in info.formula_details %}<article class="formula-detail"><div class="formula-detail-math">\( {{ item.formula }} \)</div><p><b>Izoh:</b> {{ item.explanation }}</p><pre><code>{{ item.python_code }}</code></pre></article>{% endfor %}</div></section>
+{% endif %}
+
+{% if info.get('examples') %}
+<section class="lesson-panel image-examples-panel"><div class="panel-title">🖼️ M01 va M02 — misollar va rasmlar</div><p class="muted">Yuklangan va topshiriqlarda hosil qilingan namunaviy rasmlar.</p><div class="image-example-grid">{% for ex in info.examples %}<article class="image-example-card"><div class="image-example-title"><b>{{ ex.title }}</b><span>MISOL</span></div><img src="{{ url_for('static', filename=ex.image) }}" alt="{{ ex.title }}" loading="lazy"><p>{{ ex.description }}</p></article>{% endfor %}</div></section>
+{% endif %}
+
+
+{% if info.get('example_runners') %}
+<section class="lesson-panel example-runner-panel">
+  <div class="panel-title">▶ M01 va M02 misollarini ishga tushirish</div>
+  <p class="muted">Har bir misol alohida ishga tushadi. Dastur chiqargan barcha rasmlar shu yerda avtomatik ko‘rsatiladi.</p>
+  <div class="example-runner-grid">
+    {% for ex in info.example_runners %}
+    <article class="example-runner-card">
+      <div class="image-example-title"><b>{{ ex.title }}</b><span>{{ ex.key|upper }}</span></div>
+      <p>{{ ex.description }}</p>
+      <button class="run-btn example-run-btn" onclick="runExample('{{ ex.key }}', this)">▶ RUN {{ ex.key|upper }}</button>
+      <div class="status example-status hidden"></div>
+      <pre class="output example-output">RUN tugmasini bosing...</pre>
+      <div class="example-results"></div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if info.get('expected_output') %}
+<section class="lesson-panel expected-panel"><div class="panel-title">📊 Kutilgan natija</div><p class="muted">Berilgan yechim va seed asosida olinadigan namunaviy natija:</p><pre class="output expected-output">{{ info.expected_output }}</pre></section>
+{% endif %}
+
+{% if info.get('algorithm') %}
+<section class="lesson-panel"><div class="panel-title">🧩 Yechish algoritmi</div><ol class="algorithm">{% for step in info.algorithm %}<li>{{ step }}</li>{% endfor %}</ol></section>
+{% endif %}
+
+<section class="code-run-grid">
+<div class="code-card"><div class="code-head"><span>🐍 Python kodi</span><span>exercises/{{ number }}.py</span></div><pre id="code"><code>{{ code }}</code></pre></div>
+<div class="run-card"><div class="run-head"><div><b>Interaktiv natija</b><small>Serverdagi Python interpreter</small></div><button id="runBtn" class="run-btn" onclick="runExercise({{ number }})">▶ RUN</button></div><div id="status" class="status hidden"></div><pre id="output" class="output">RUN tugmasini bosing...</pre></div>
+</section>
+
+<div class="exercise-nav">{% if previous_number is not none %}<a href="{{ url_for('exercise',number=previous_number,topic=topic_id) }}">← Oldingi</a>{% else %}<span></span>{% endif %}<a href="{{ url_for('topic',topic_id=topic_id) }}">{{ topic.title }}</a>{% if next_number is not none %}<a href="{{ url_for('exercise',number=next_number,topic=topic_id) }}">Keyingi →</a>{% else %}<span></span>{% endif %}</div>
+{% endblock %}

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Deep Learning Practice{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<script>
+window.MathJax={tex:{inlineMath:[['\\(','\\)'],['$','$']],displayMath:[['\\[','\\]'],['$$','$$']]},svg:{fontCache:'global'}};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body>
+<div class="app-shell">
+<aside class="sidebar" id="sidebar">
+  <a class="brand" href="{{ url_for('index') }}"><span class="brand-mark">🧠</span><span><b>Deep Learning</b><small>Amaliy mashg‘ulotlar platformasi</small></span></a>
+  <nav class="main-nav">
+    <a href="{{ url_for('index') }}" class="nav-item">⌂ <span>Bosh sahifa</span></a>
+    <a href="{{ url_for('admin') }}" class="nav-item admin-nav">⚙ <span>Kontent boshqaruvi</span></a>
+  </nav>
+  <div class="side-title">MAVZULAR</div>
+  <div class="topic-nav">
+    {% for tid,t in topics.items()|sort %}
+    <a class="topic-link {% if topic_id is defined and topic_id == tid %}active{% endif %}" href="{{ url_for('topic',topic_id=tid) }}">
+      <span class="topic-icon">{{ t.icon }}</span><span><b>{{ t.title }}</b><small>{{ t.subtitle }}</small></span>
+    </a>
+    {% endfor %}
+  </div>
+  {% if topic_id is defined %}
+  <div class="side-title">TOPSHIRIQLAR</div>
+  <div class="file-list">
+    {% for n,path in exercises %}
+    <a class="file {% if number is defined and number==n %}active{% endif %}" href="{{ url_for('exercise',number=n,topic=topic_id) }}">
+      <span class="file-num">{{ n }}</span><span>{{ (n|string) }}.py</span>
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+</aside>
+<main class="main">
+<header class="topbar">
+  <button class="mobile-menu" onclick="toggleSidebar()">☰</button>
+  <div class="topbar-title">Deep Learning <span>/ Practice</span></div>
+  <div class="top-actions"><a href="{{ url_for('admin') }}" class="top-admin">＋ Yangi kontent</a><button onclick="toggleTheme()" class="theme-btn">☾</button></div>
+</header>
+<div class="page">
+{% with messages=get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-stack">
+{% for category,msg in messages %}<div class="flash {{ category }}">{{ msg }}</div>{% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+{% block content %}{% endblock %}
+</div>
+<footer>Deep Learning Practice · {{ current_year }}</footer>
+</main>
+</div>
+<script src="{{ url_for('static',filename='js/app.js') }}"></script>
+</body>
+</html>

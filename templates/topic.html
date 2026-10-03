@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{{ topic.title }} — Deep Learning{% endblock %}
+{% block content %}
+<div class="crumb">Bosh sahifa / {{ topic.title }}</div>
+<section class="topic-hero">
+  <div><span class="eyebrow">{{ topic.title }}</span><h1>{{ topic.subtitle }}</h1><p>{{ topic.description }}</p></div>
+  <div class="topic-hero-icon">{{ topic.icon }}</div>
+</section>
+<div class="toolbar"><div><b>{{ exercises|length }} ta topshiriq</b><span> · formulalar + algoritm + Python + RUN</span></div><a class="btn primary small" href="{{ url_for('admin') }}">＋ Yangi masala</a></div>
+<div class="exercise-grid">
+{% for n,path in exercises %}
+{% set info=metadata.get(n|string,{}) %}
+<a class="exercise-card" href="{{ url_for('exercise',number=n,topic=topic_id) }}">
+  <div class="exercise-number">{{ "%02d"|format(n) }}</div>
+  <div class="exercise-content"><span class="mini-label">TOPSHIRIQ {{ n }}</span><h3>{{ info.get('title',n~'.py') }}</h3><p>{{ info.get('description','Python kodi va yechim.') }}</p><div class="exercise-tags"><span>Python</span>{% if info.get('formulas') %}<span>Formula</span>{% endif %}<span>RUN</span></div></div><span class="card-arrow">↗</span>
+</a>
+{% endfor %}
+</div>
+{% if not exercises %}<div class="empty"><div>📚</div><h2>Hali topshiriqlar yo‘q</h2><p>Admin panel orqali birinchi topshiriqni qo‘shing.</p><a class="btn primary" href="{{ url_for('admin') }}">＋ Topshiriq qo‘shish</a></div>{% endif %}
+{% endblock %}

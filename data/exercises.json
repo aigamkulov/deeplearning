@@ -1,0 +1,701 @@
+{
+  "topics": {
+    "1": {
+      "title": "1-MAVZU",
+      "subtitle": "Sun’iy neyron, perceptron va logistika neyronlari",
+      "description": "Sun’iy neyronlar, perceptron, logistika neyroni va ularning matematik asoslari bo‘yicha amaliy mashg‘ulotlar.",
+      "icon": "🧠"
+    },
+    "2": {
+      "title": "2-MAVZU",
+      "subtitle": "Backpropagation, Softmax va optimizatsiya algoritmlari",
+      "description": "Backpropagation, Softmax, gradientlar, loss funksiyalari va optimizatorlar bo‘yicha chuqur amaliy topshiriqlar.",
+      "icon": "⚡"
+    },
+    "3": {
+      "title": "3-MAVZU",
+      "subtitle": "Computer Vision va raqamli tasvirlar",
+      "description": "Raqamli tasvirlarda sensor shovqini, photon transfer va aliasing/chastota tahlili bo‘yicha amaliy topshiriqlar.",
+      "icon": "👁️"
+    }
+  },
+  "exercises": {
+    "17": {
+      "title": "Aktivatsiya funksiyalari va hosilalarini tekshirish",
+      "description": "Sigmoid, Tanh, ReLU, Leaky ReLU va Softplus funksiyalarini NumPy bilan hisoblash va PyTorch Autograd bilan solishtirish.",
+      "formulas": [
+        "\\sigma(z)=\\frac{1}{1+e^{-z}}",
+        "\\sigma'(z)=\\sigma(z)(1-\\sigma(z))",
+        "\\tanh'(z)=1-\\tanh^2(z)",
+        "\\operatorname{ReLU}(z)=\\max(0,z)",
+        "\\operatorname{LeakyReLU}(z)=\\begin{cases}z,&z>0\\\\\\alpha z,&z\\le0\\end{cases}",
+        "\\operatorname{Softplus}(z)=\\ln(1+e^z)"
+      ],
+      "algorithm": [
+        "Aktivatsiya va analitik hosilalarni aniqlash.",
+        "z qiymatlarini yaratish.",
+        "NumPy hisob-kitoblarini bajarish.",
+        "PyTorch Autograd bilan hosilalarni tekshirish.",
+        "Natijalarni np.allclose() bilan solishtirish."
+      ],
+      "formula_details": [
+        {
+          "formula": "\\sigma(z)=\\frac{1}{1+e^{-z}}",
+          "explanation": "Sigmoid qiymati 0 va 1 oralig‘iga o'tkaziladi.",
+          "python_code": "sigmoid = 1 / (1 + np.exp(-z))"
+        },
+        {
+          "formula": "\\sigma'(z)=\\sigma(z)(1-\\sigma(z))",
+          "explanation": "Sigmoid hosilasi sigmoidning o‘zidan hisoblanadi.",
+          "python_code": "sigmoid_prime = sigmoid * (1 - sigmoid)"
+        },
+        {
+          "formula": "\\tanh'(z)=1-\\tanh^2(z)",
+          "explanation": "Tanh hosilasi 1 minus tanh kvadratiga teng.",
+          "python_code": "tanh = np.tanh(z)\ntanh_prime = 1 - tanh ** 2"
+        },
+        {
+          "formula": "\\operatorname{ReLU}(z)=\\max(0,z)",
+          "explanation": "ReLU manfiy qiymatlarni nolga tushiradi.",
+          "python_code": "relu = np.maximum(0, z)"
+        },
+        {
+          "formula": "\\operatorname{LeakyReLU}(z)=\\begin{cases}z,&z>0\\\\\\alpha z,&z\\le0\\end{cases}",
+          "explanation": "Manfiy sohada kichik alpha gradient saqlanadi.",
+          "python_code": "leaky_relu = np.where(z > 0, z, alpha * z)"
+        },
+        {
+          "formula": "\\operatorname{Softplus}(z)=\\ln(1+e^z)",
+          "explanation": "Softplus barqaror logaddexp orqali hisoblanadi.",
+          "python_code": "softplus = np.logaddexp(0, z)"
+        }
+      ],
+      "topic_ids": [
+        1,
+        2
+      ]
+    },
+    "18": {
+      "title": "Barqaror LogSoftmax va Cross-Entropy",
+      "description": "Katta logitlarda log-sum-exp hiylasi yordamida barqaror log_softmax va o‘rtacha cross-entropy hisoblash.",
+      "formulas": [
+        "\\operatorname{LSE}(z)=m+\\ln\\sum_j e^{z_j-m},\\quad m=\\max_j z_j",
+        "\\log\\operatorname{softmax}(z_i)=z_i-\\operatorname{LSE}(z)",
+        "CE=-\\frac1N\\sum_i\\log p_{i,y_i}"
+      ],
+      "algorithm": [
+        "Logit matritsasini yaratish.",
+        "Har bir qator uchun maksimal qiymatni olish.",
+        "Log-sum-exp orqali log_softmaxni hisoblash.",
+        "Target klasslar bo‘yicha CE ni hisoblash.",
+        "PyTorch F.cross_entropy bilan tekshirish."
+      ],
+      "formula_details": [
+        {
+          "formula": "m=\\max_j z_j",
+          "explanation": "Overflowni kamaytirish uchun har bir qator maksimumi ayiriladi.",
+          "python_code": "m = np.max(z, axis=1, keepdims=True)"
+        },
+        {
+          "formula": "\\log\\operatorname{softmax}(z_i)=z_i-\\operatorname{LSE}(z)",
+          "explanation": "Barqaror log-softmax formulasi.",
+          "python_code": "return z - m - np.log(np.sum(np.exp(z - m), axis=1, keepdims=True))"
+        },
+        {
+          "formula": "CE=-\\frac1N\\sum_i\\log p_{i,y_i}",
+          "explanation": "Target klasslarning log ehtimollari manfiy o‘rtachasi.",
+          "python_code": "return -np.mean(logp[np.arange(len(y)), y])"
+        }
+      ],
+      "topic_ids": [
+        1,
+        2
+      ]
+    },
+    "19": {
+      "title": "Softmax Jacobiani",
+      "description": "Softmax funksiyasining Yakobiy matritsasini torch.autograd.functional.jacobian bilan hisoblash va nazariy formula bilan tekshirish.",
+      "formulas": [
+        "p_i=\\frac{e^{z_i}}{\\sum_j e^{z_j}}",
+        "J=\\operatorname{diag}(p)-pp^T",
+        "J=J^T",
+        "J\\mathbf{1}=0"
+      ],
+      "algorithm": [
+        "z tensorini yaratish.",
+        "Softmax funksiyasini aniqlash.",
+        "Autograd Jacobianini olish.",
+        "diag(p)-ppᵀ bilan solishtirish.",
+        "Moslik, simmetriya va qator yig‘indilarini tekshirish."
+      ],
+      "formula_details": [
+        {
+          "formula": "p_i=\\frac{e^{z_i}}{\\sum_j e^{z_j}}",
+          "explanation": "Softmax logitlarni ehtimolliklarga aylantiradi.",
+          "python_code": "p = torch.softmax(z, dim=0)"
+        },
+        {
+          "formula": "J=\\operatorname{diag}(p)-pp^T",
+          "explanation": "Softmax Jacobiani uchun yopiq formula.",
+          "python_code": "J_formula = torch.diag(p) - torch.outer(p, p)"
+        },
+        {
+          "formula": "J\\mathbf{1}=0",
+          "explanation": "Har bir softmax qatori yig‘indisi 1 bo‘lgani uchun hosilalar yig‘indisi 0.",
+          "python_code": "J.sum(dim=1)"
+        }
+      ],
+      "topic_ids": [
+        1,
+        2
+      ]
+    },
+    "20": {
+      "title": "NumPy MLP va gradient tekshiruvi",
+      "description": "Kichik MLP uchun forward/backward algoritmini NumPyda qo‘lda yozish va markaziy ayirma bilan gradientlarni tekshirish.",
+      "formulas": [
+        "Z_1=XW_1+b_1",
+        "A_1=\\tanh(Z_1)",
+        "Z_2=A_1W_2+b_2",
+        "L=\\frac1N\\sum_i[\\log(1+e^{z_i})-y_i z_i]",
+        "\\frac{\\partial L}{\\partial z}=\\frac{p-y}{N}"
+      ],
+      "algorithm": [
+        "MLP parametrlarini yaratish.",
+        "Forward pass va BCE lossni hisoblash.",
+        "Backpropagation orqali gradientlarni olish.",
+        "Har bir parametr uchun markaziy ayirma hisoblash.",
+        "Nisbiy xatoni 1e-7 chegarasi bilan tekshirish."
+      ],
+      "formula_details": [
+        {
+          "formula": "Z_1=XW_1+b_1",
+          "explanation": "Birinchi linear qatlam.",
+          "python_code": "Z1 = X @ self.W1 + self.b1"
+        },
+        {
+          "formula": "A_1=\\tanh(Z_1)",
+          "explanation": "Yashirin qatlam aktivatsiyasi.",
+          "python_code": "A1 = np.tanh(Z1)"
+        },
+        {
+          "formula": "L=\\frac1N\\sum_i[\\log(1+e^{z_i})-y_i z_i]",
+          "explanation": "Stable BCE logit ko‘rinishi.",
+          "python_code": "loss = np.mean(np.logaddexp(0, z) - y * z)"
+        },
+        {
+          "formula": "\\frac{\\partial L}{\\partial z}=\\frac{p-y}{N}",
+          "explanation": "BCE va sigmoid birikmasining gradienti.",
+          "python_code": "dz2 = (p - y[:, None]) / N"
+        }
+      ],
+      "topic_ids": [
+        1,
+        2
+      ]
+    },
+    "21": {
+      "title": "Sonli hosila xatosi",
+      "description": "f(t)=sin(t), t=1 uchun markaziy ayirma yordamida hosilani hisoblash, epsilonni 10^-1 dan 10^-12 gacha sinash va eng yaxshi qiymatni topish.",
+      "formulas": [
+        "f(t)=\\sin t",
+        "f'(t)=\\cos t",
+        "f'(t)\\approx\\frac{f(t+\\varepsilon)-f(t-\\varepsilon)}{2\\varepsilon}"
+      ],
+      "algorithm": [
+        "Aniq hosilani cos(t) orqali hisoblash.",
+        "ε=10^-k, k=1,...,12 qiymatlarini sinash.",
+        "Markaziy ayirma xatosini hisoblash.",
+        "Eng kichik xatoli ε ni tanlash.",
+        "Truncation va floating-point xatolarini izohlash."
+      ],
+      "formula_details": [
+        {
+          "formula": "f'(t)=\\cos t",
+          "explanation": "sin funksiyasining analitik hosilasi.",
+          "python_code": "math.cos(t)"
+        },
+        {
+          "formula": "f'(t)\\approx\\frac{f(t+\\varepsilon)-f(t-\\varepsilon)}{2\\varepsilon}",
+          "explanation": "Markaziy ayirma sonli hosila beradi.",
+          "python_code": "(f(t + eps) - f(t - eps)) / (2 * eps)"
+        }
+      ],
+      "topic_ids": [
+        1,
+        2
+      ]
+    },
+    "22": {
+      "title": "Mini-batch SGD",
+      "description": "Breast Cancer ma’lumotlarida MLPni mini-batch SGD bilan 20 epoch o‘qitish va har epochda train CE hamda test accuracy ni chiqarish.",
+      "formulas": [
+        "z=XW+b",
+        "L=\\frac1N\\sum_i[\\log(1+e^{z_i})-y_i z_i]",
+        "\\theta\\leftarrow\\theta-\\eta\\nabla_\\theta L_B"
+      ],
+      "algorithm": [
+        "Breast Cancer datasetini yuklash.",
+        "StandardScaler bilan standartlashtirish.",
+        "MLPni yaratish.",
+        "B=32 mini-batchlarni har epochda qayta aralashtirish.",
+        "CE gradientlari bilan parametrlarni yangilash.",
+        "Har epoch train CE va test accuracy chiqarish."
+      ],
+      "formula_details": [
+        {
+          "formula": "\\theta\\leftarrow\\theta-\\eta\\nabla_\\theta L_B",
+          "explanation": "Mini-batch gradienti bilan parametr yangilanadi.",
+          "python_code": "net.W1 -= eta * gW1\nnet.b1 -= eta * gb1\nnet.W2 -= eta * gW2\nnet.b2 -= eta * gb2"
+        },
+        {
+          "formula": "L=\\frac1N\\sum_i[\\log(1+e^{z_i})-y_i z_i]",
+          "explanation": "Binary CE stable ko‘rinishda hisoblanadi.",
+          "python_code": "loss = np.mean(np.logaddexp(0, z) - y * z)"
+        }
+      ],
+      "topic_ids": [
+        1,
+        2
+      ]
+    },
+    "23": {
+      "title": "Optimizerlarni taqqoslash",
+      "description": "Bir xil MLPda SGD, Momentum, Adam va AdamW optimizerlarini 20 epoch davomida taqqoslash.",
+      "formulas": [
+        "\\theta_{t+1}=\\theta_t-\\eta g_t",
+        "v_t=\\mu v_{t-1}+g_t",
+        "m_t=\\beta_1m_{t-1}+(1-\\beta_1)g_t",
+        "\\theta\\leftarrow\\theta-\\eta\\frac{\\hat m_t}{\\sqrt{\\hat v_t}+\\epsilon}"
+      ],
+      "algorithm": [
+        "Bir xil model arxitekturasini yaratish.",
+        "Har optimizer uchun yangi model va DataLoader yaratish.",
+        "20 epoch o‘qitish.",
+        "Train CE va test accuracy ni hisoblash.",
+        "Natijalarni jadval ko‘rinishida chiqarish."
+      ],
+      "formula_details": [
+        {
+          "formula": "\\theta_{t+1}=\\theta_t-\\eta g_t",
+          "explanation": "Oddiy SGD gradient yo‘nalishida parametrni yangilaydi.",
+          "python_code": "torch.optim.SGD(model.parameters(), lr=0.1)"
+        },
+        {
+          "formula": "v_t=\\mu v_{t-1}+g_t",
+          "explanation": "Momentum oldingi gradient yo‘nalishini hisobga oladi.",
+          "python_code": "torch.optim.SGD(model.parameters(), lr=0.05, momentum=0.9)"
+        },
+        {
+          "formula": "\\theta\\leftarrow\\theta-\\eta\\frac{\\hat m_t}{\\sqrt{\\hat v_t}+\\epsilon}",
+          "explanation": "Adam adaptiv birinchi va ikkinchi momentlardan foydalanadi.",
+          "python_code": "torch.optim.Adam(model.parameters(), lr=1e-3)"
+        },
+        {
+          "formula": "\\theta\\leftarrow\\theta-\\eta\\frac{\\hat m_t}{\\sqrt{\\hat v_t}+\\epsilon}-\\eta\\lambda\\theta",
+          "explanation": "AdamW weight decay ni decoupled tarzda qo‘llaydi.",
+          "python_code": "torch.optim.AdamW(model.parameters(), lr=1e-3, weight_decay=1e-2)"
+        }
+      ],
+      "topic_ids": [
+        1,
+        2
+      ]
+    },
+    "24": {
+      "title": "Softmaxni ikki marta qo‘llash",
+      "description": "CrossEntropyLoss oldidan Softmax qo‘shish va qo‘shmaslik variantlarini taqqoslash hamda ln(e+9)-1 chegarasini hisoblash.",
+      "formulas": [
+        "CE(z,y)=-z_y+\\log\\sum_j e^{z_j}",
+        "\\operatorname{softmax}(z_i)=\\frac{e^{z_i}}{\\sum_j e^{z_j}}",
+        "\\ln(e+9)-1"
+      ],
+      "algorithm": [
+        "Bir xil MLP yaratish.",
+        "Birinchi variantda logitsni bevosita CrossEntropyLossga berish.",
+        "Ikkinchi variantda Softmaxdan keyin CE hisoblash.",
+        "CE qiymatlarini solishtirish.",
+        "Nazariy chegarani hisoblash."
+      ],
+      "formula_details": [
+        {
+          "formula": "CE(z,y)=-z_y+\\log\\sum_j e^{z_j}",
+          "explanation": "PyTorch CrossEntropyLoss logits bilan to‘g‘ridan-to‘g‘ri ishlaydi.",
+          "python_code": "loss = nn.CrossEntropyLoss()(logits, y)"
+        },
+        {
+          "formula": "\\operatorname{softmax}(z_i)=\\frac{e^{z_i}}{\\sum_j e^{z_j}}",
+          "explanation": "Softmax logitsni probabilityga aylantiradi.",
+          "python_code": "pred = torch.softmax(logits, dim=1)"
+        },
+        {
+          "formula": "\\ln(e+9)-1",
+          "explanation": "10 klassli holatda topshiriqda so‘ralgan nazariy chegara.",
+          "python_code": "bound = math.log(math.e + 9) - 1"
+        }
+      ],
+      "topic_ids": [
+        1,
+        2
+      ]
+    },
+    "25": {
+      "title": "Gradient accumulation",
+      "description": "32 namunali batch gradientini 4 ta mikro-batchga bo‘lib, loss/4 orqali yig‘ish va zero_grad()siz ikki backward ta’sirini ko‘rsatish.",
+      "formulas": [
+        "g=\\frac14\\sum_{k=1}^{4}g_k",
+        "\\|\\nabla\\|/\\|\\nabla_{\\mathrm{to‘g‘ri}}\\|"
+      ],
+      "algorithm": [
+        "Full-batch gradientni hisoblash.",
+        "Batchni 4 mikro-batchga bo‘lish.",
+        "Har mikro-batch lossini 4 ga bo‘lib backward qilish.",
+        "Full va accumulated gradientlarni solishtirish.",
+        "zero_grad()siz ketma-ket backward holatini o‘lchash."
+      ],
+      "formula_details": [
+        {
+          "formula": "g=\\frac14\\sum_{k=1}^{4}g_k",
+          "explanation": "Har mikro-batch lossini 4 ga bo‘lish full-batch o‘rtacha gradientiga mos keladi.",
+          "python_code": "micro_loss = criterion(model(xb), yb) / 4\nmicro_loss.backward()"
+        },
+        {
+          "formula": "\\|\\nabla\\|/\\|\\nabla_{\\mathrm{to‘g‘ri}}\\|",
+          "explanation": "Gradient yig‘ilib qolsa norma ortadi.",
+          "python_code": "ratio = torch.linalg.vector_norm(b) / torch.linalg.vector_norm(a)"
+        }
+      ],
+      "topic_ids": [
+        1,
+        2
+      ]
+    },
+    "26": {
+      "title": "Gradient portlashi va clipping",
+      "description": "Katta boshlang‘ich weightlar va gradient clipping yordamida gradient normasini cheklash.",
+      "formulas": [
+        "\\tilde g=g\\min\\left(1,\\frac{c}{\\|g\\|}\\right)",
+        "\\|g\\|\\le c"
+      ],
+      "algorithm": [
+        "MLPni yaratish.",
+        "Turli initialization standart og‘ishlarini berish.",
+        "Backwarddan keyin gradient normasini o‘lchash.",
+        "clip_grad_norm_ bilan clipping qilish.",
+        "Natijani turli konfiguratsiyalarda taqqoslash."
+      ],
+      "formula_details": [
+        {
+          "formula": "\\tilde g=g\\min(1,c/\\|g\\|)",
+          "explanation": "Gradient normasi max_normdan oshsa barcha gradientlar bir xil koeffitsient bilan qisqaradi.",
+          "python_code": "torch.nn.utils.clip_grad_norm_(m.parameters(), max_norm)"
+        },
+        {
+          "formula": "\\|g\\|\\le c",
+          "explanation": "Clippingdan keyingi gradient normasi belgilangan chegaraga yaqinlashadi.",
+          "python_code": "max_norm = 1.0"
+        }
+      ],
+      "topic_ids": [
+        1,
+        2
+      ]
+    },
+    "27": {
+      "title": "Inverted Dropout",
+      "description": "Inverted dropoutni NumPyda qo‘lda yozish, backward gradientini tekshirish va PyTorch Dropout bilan train/eval rejimlarini solishtirish.",
+      "formulas": [
+        "m_i\\sim\\operatorname{Bernoulli}(1-p)",
+        "y_i=\\frac{m_i a_i}{1-p}",
+        "\\frac{\\partial L}{\\partial a_i}=\\frac{m_i}{1-p}\\frac{\\partial L}{\\partial y_i}"
+      ],
+      "algorithm": [
+        "Mask yaratish.",
+        "Train vaqtida 1/(1-p) scaling bilan dropout qo‘llash.",
+        "Backward gradientini mask bilan hisoblash.",
+        "PyTorch Dropout train rejimida tekshirish.",
+        "eval() rejimida scaling o‘zgarmasligini tekshirish."
+      ],
+      "formula_details": [
+        {
+          "formula": "m_i\\sim\\operatorname{Bernoulli}(1-p)",
+          "explanation": "Har element saqlanish ehtimoli 1-p bo‘lgan mask orqali tanlanadi.",
+          "python_code": "keep = (rng.random(a.shape) >= p).astype(np.float64)"
+        },
+        {
+          "formula": "y_i=\\frac{m_i a_i}{1-p}",
+          "explanation": "Inverted dropout train vaqtida kutilgan qiymatni saqlaydi.",
+          "python_code": "out = a * keep / (1 - p)"
+        },
+        {
+          "formula": "\\frac{\\partial L}{\\partial a_i}=\\frac{m_i}{1-p}\\frac{\\partial L}{\\partial y_i}",
+          "explanation": "Backward gradient ham shu scaling bilan maskalanadi.",
+          "python_code": "return grad_out * mask / (1 - p)"
+        }
+      ],
+      "topic_ids": [
+        1,
+        2
+      ]
+    },
+    "28": {
+      "title": "Mini-batch gradient shovqini",
+      "description": "Breast Cancer datasetida B=8,32,128 mini-batchlar uchun gradient o‘rtachasi, std va std*sqrt(B) ni taqqoslash.",
+      "formulas": [
+        "g_B=\\frac1B\\sum_{i\\in B}g_i",
+        "\\operatorname{Std}(g_B)\\propto\\frac1{\\sqrt B}",
+        "\\max|g_B-\\nabla L|"
+      ],
+      "algorithm": [
+        "Datasetni train/testga ajratish.",
+        "StandardScalerni faqat train qismida fit qilish.",
+        "Logistic neuron gradientini aniqlash.",
+        "Turli batch o‘lchamlaridan 2000 ta tasodifiy batch olish.",
+        "Gradient mean va std ni hisoblash.",
+        "B oshganda shovqin kamayishini tekshirish."
+      ],
+      "formula_details": [
+        {
+          "formula": "g_B=\\frac1B\\sum_{i\\in B}g_i",
+          "explanation": "Mini-batch gradienti batchdagi namunalar gradientlarining o‘rtachasidir.",
+          "python_code": "return xb.T @ (p - yb) / len(ids)"
+        },
+        {
+          "formula": "\\operatorname{Std}(g_B)\\propto\\frac1{\\sqrt B}",
+          "explanation": "Mustaqil namunalar taxminida batch kattalashganda gradient dispersiyasi kamayadi.",
+          "python_code": "std.mean() * np.sqrt(B)"
+        },
+        {
+          "formula": "\\max|g_B-\\nabla L|",
+          "explanation": "Mini-batch o‘rtacha gradientining full gradientdan maksimal farqi.",
+          "python_code": "np.max(np.abs(mean - g_full))"
+        }
+      ],
+      "topic_ids": [
+        1,
+        2
+      ]
+    },
+    "29": {
+      "title": "Rosenbrock funksiyasida optimizatorlar",
+      "description": "Rosenbrock funksiyasini SGD, Momentum va Adam bilan 500 qadam optimallashtirish va float64 PyTorch natijasi bilan tekshirish.",
+      "formulas": [
+        "f(\\theta)=(1-\\theta_1)^2+100(\\theta_2-\\theta_1^2)^2",
+        "\\theta_0=(-1.2,1)",
+        "\\theta_{t+1}=\\theta_t-\\eta\\nabla f(\\theta_t)"
+      ],
+      "algorithm": [
+        "Rosenbrock funksiyasini aniqlash.",
+        "Boshlang‘ich nuqtani (-1.2,1) olish.",
+        "SGD, Momentum va Adamni alohida ishga tushirish.",
+        "500 qadam bajarish.",
+        "theta_500 va f(theta_500) ni chiqarish.",
+        "PyTorch float64 bilan moslikni tekshirish."
+      ],
+      "formula_details": [
+        {
+          "formula": "f(\\theta)=(1-\\theta_1)^2+100(\\theta_2-\\theta_1^2)^2",
+          "explanation": "Rosenbrock optimallashtirish funksiyasi.",
+          "python_code": "return (1 - t1)**2 + 100 * (t2 - t1**2)**2"
+        },
+        {
+          "formula": "\\theta_{t+1}=\\theta_t-\\eta\\nabla f(\\theta_t)",
+          "explanation": "SGD parametrni gradientga qarama-qarshi yo‘nalishda siljitadi.",
+          "python_code": "torch.optim.SGD([theta], lr=3e-3)"
+        },
+        {
+          "formula": "\\theta_0=(-1.2,1)",
+          "explanation": "Barcha optimizatorlar bir xil boshlang‘ich nuqtadan boshlanadi.",
+          "python_code": "theta0 = torch.tensor([-1.2, 1.0], dtype=torch.float64)"
+        }
+      ],
+      "topic_ids": [
+        1,
+        2
+      ]
+    },
+    "30": {
+      "title": "Breast Cancer: warmup, cosine LR va early stopping",
+      "description": "Breast Cancer datasetida train/validation/test ajratish, StandardScaler, Dropout, AdamW, warmup+cosine LambdaLR va Early Stopping bilan binary classification.",
+      "formulas": [
+        "X\\rightarrow\\operatorname{StandardScaler}(X)",
+        "f(x)=W_2\\operatorname{Dropout}(\\operatorname{ReLU}(W_1x+b_1))+b_2",
+        "CE=-\\frac1N\\sum_i\\log p_{i,y_i}",
+        "\\lambda(t)=\\frac{t+1}{T_w}\\quad(t<T_w)",
+        "\\lambda(t)=\\frac12\\left(1+\\cos\\frac{\\pi(t-T_w)}{T-T_w}\\right)\\quad(t\\ge T_w)",
+        "F_1=2\\frac{PR}{P+R}"
+      ],
+      "algorithm": [
+        "80/20 test split va train qismidan 75/25 validation split.",
+        "StandardScalerni faqat train qismida fit qilish.",
+        "30→32→2 model, ReLU va Dropout(0.2) yaratish.",
+        "AdamW lr=1e-2 va weight_decay=1e-2 bilan o‘qitish.",
+        "5 epoch warmup va cosine LR jadvalini qo‘llash.",
+        "Validation CE yaxshilanmasa 10 epochdan keyin early stopping.",
+        "Eng yaxshi state_dictni tiklash va test accuracy/F1 hisoblash."
+      ],
+      "formula_details": [
+        {
+          "formula": "f(x)=W_2\\operatorname{Dropout}(\\operatorname{ReLU}(W_1x+b_1))+b_2",
+          "explanation": "Model arxitekturasi 30→32→2, ReLU va Dropout(0.2).",
+          "python_code": "nn.Sequential(nn.Linear(30, 32), nn.ReLU(), nn.Dropout(0.2), nn.Linear(32, 2))"
+        },
+        {
+          "formula": "\\lambda(t)=\\frac{t+1}{T_w}\\quad(t<T_w)",
+          "explanation": "Dastlabki 5 epochda learning rate bosqichma-bosqich oshiriladi.",
+          "python_code": "if epoch < Tw:\n    return (epoch + 1) / Tw"
+        },
+        {
+          "formula": "\\lambda(t)=\\frac12(1+\\cos(\\pi(t-T_w)/(T-T_w)))",
+          "explanation": "Warmupdan keyin cosine decay ishlaydi.",
+          "python_code": "return 0.5 * (1 + np.cos(np.pi * progress))"
+        },
+        {
+          "formula": "F_1=2\\frac{PR}{P+R}",
+          "explanation": "Testdagi positive_label=0 uchun F1 hisoblanadi.",
+          "python_code": "f1_score(y_test, test_pred, pos_label=0)"
+        }
+      ],
+      "topic_ids": [
+        1,
+        2
+      ]
+    },
+    "31": {
+      "title": "Sensor shovqini va SNR",
+      "description": "Puasson foton shovqini va o‘qish shovqinini modellashtirib, o‘lchangan dispersiya va SNR ni nazariy qiymatlar bilan solishtirish.",
+      "statement": "Turli yorqinlik qiymatlarida sensor signalini g·Poisson(mu)+N(0,sigma_r²) modeli bilan hosil qiling. O‘lchangan dispersiya, SNR va nazariy qiymatlarni taqqoslang.",
+      "formulas": [
+        "X=g\\operatorname{Poisson}(\\mu)+\\mathcal{N}(0,\\sigma_r^2)",
+        "\\operatorname{Var}(X)\\approx\\mu+\\sigma_r^2",
+        "\\operatorname{SNR}_{theory}=\\frac{\\mu}{\\sqrt{\\mu+\\sigma_r^2}}"
+      ],
+      "algorithm": [
+        "Seed=42 bilan tasodifiy generatorni sozlash.",
+        "μ=5,50,500,5000 qiymatlari uchun 100000 ta namuna olish.",
+        "O‘lchangan dispersiya va SNR ni hisoblash.",
+        "Nazariy qiymatlar bilan taqqoslash."
+      ],
+      "formula_details": [
+        {
+          "formula": "X=g\\operatorname{Poisson}(\\mu)+\\mathcal{N}(0,\\sigma_r^2)",
+          "explanation": "Sensor signali fotonlarning Puasson shovqini va o‘qish shovqinining yig‘indisi sifatida modellashtiriladi.",
+          "python_code": "return g * rng.poisson(mu, n) + rng.normal(0.0, sigma_r, n)"
+        },
+        {
+          "formula": "\\operatorname{Var}(X)\\approx\\mu+\\sigma_r^2",
+          "explanation": "g=1 bo‘lganda Puasson dispersiyasi μ ga, normal shovqin dispersiyasi σr² ga teng.",
+          "python_code": "mu + sigma_r**2"
+        },
+        {
+          "formula": "\\operatorname{SNR}=\\frac{\\mu}{\\sqrt{\\mu+\\sigma_r^2}}",
+          "explanation": "Signal o‘rtacha qiymatining standart og‘ishga nisbati.",
+          "python_code": "mu / np.sqrt(mu + 16)"
+        }
+      ],
+      "expected_output": "--- task 17 ---\n mu    var_meas  mu+sr^2  SNR_meas  SNR_theory  sqrt(mu)\n    5     20.89       21     1.090       1.091     2.236\n   50     65.63       66     6.172       6.155     7.071\n  500    513.96      516    22.052      22.011    22.361\n 5000   4997.95     5016    70.723      70.598    70.711",
+      "topic_ids": [
+        3
+      ]
+    },
+    "32": {
+      "title": "Photon Transfer Curve (PTC)",
+      "description": "Turli yoritilganlik darajalarida signal o‘rtachasi va dispersiyasi orqali sensor gain va read noise ni baholash.",
+      "statement": "Ikki tekis kadr asosida Photon Transfer Curve ni hisoblang. Mean-DN va variance-DN orasidagi chiziqli bog‘lanishdan gain va read noise ni aniqlang.",
+      "formulas": [
+        "\\operatorname{Var}(D)\\approx g\\,\\operatorname{Mean}(D)+b",
+        "g=\\frac{\\Delta Var}{\\Delta Mean}",
+        "\\sigma_r=\\frac{\\sqrt{b}}{g}"
+      ],
+      "algorithm": [
+        "Har bir μ uchun ikkita tekis kadr yaratish.",
+        "Ikki kadr farqining dispersiyasidan noise variance ni olish.",
+        "Mean va variance nuqtalariga chiziqli regressiya qo‘llash.",
+        "Gain va read noise ni hisoblash."
+      ],
+      "formula_details": [
+        {
+          "formula": "\\operatorname{Var}(D)\\approx g\\,\\operatorname{Mean}(D)+b",
+          "explanation": "PTC modelida dispersiya signal o‘rtachasi bilan taxminan chiziqli o‘zgaradi.",
+          "python_code": "slope, icpt = np.polyfit(means, variances, 1)"
+        },
+        {
+          "formula": "g=\\frac{\\Delta Var}{\\Delta Mean}",
+          "explanation": "Chiziqning slope qiymati sensor gain ni beradi.",
+          "python_code": "gain = slope"
+        },
+        {
+          "formula": "\\sigma_r=\\frac{\\sqrt{b}}{g}",
+          "explanation": "Interceptdan read noise baholanadi.",
+          "python_code": "sr = np.sqrt(max(icpt, 0)) / slope"
+        }
+      ],
+      "expected_output": "--- task 18 ---\nmean_DN = [10.0, 25.0, 50.0, 100.0, 200.0, 400.0, 799.9]\nvar_DN  = [7.3, 14.9, 27.1, 51.7, 102.1, 205.2, 405.4]\nestimated gain = 0.5049 DN/e (true 0.5), read noise = 2.73 e (true 3.0), electrons at 4095 DN = 8110 e",
+      "topic_ids": [
+        3
+      ]
+    },
+    "33": {
+      "title": "Aliasing va chastota tahlili",
+      "description": "Diskret signalni 4 marta downsample qilishda aliasingni ko‘rish va INTER_AREA filtratsiyasining amplitudaga ta’sirini o‘lchash.",
+      "statement": "0.3125 sikl/piksel chastotali sinusoidal tasvir yarating. Oddiy ::4 slicing va INTER_AREA resize natijalarining dominant chastota va amplitudasini taqqoslang.",
+      "formulas": [
+        "x[n]=127.5+100\\cos(2\\pi f n)",
+        "f_{Nyquist}=\\frac{1}{2}",
+        "f_{alias}=|f-k|\\quad\\text{(mos Nyquist intervalida)}"
+      ],
+      "algorithm": [
+        "512 uzunlikdagi sinusoidal signal yaratish.",
+        "FFT orqali dominant chastotani topish.",
+        "Har 4-pikselni olish orqali downsample qilish.",
+        "INTER_AREA bilan 128×128 ga kamaytirish.",
+        "Chastota va amplitudalarni taqqoslash."
+      ],
+      "formula_details": [
+        {
+          "formula": "x[n]=127.5+100\\cos(2\\pi f n)",
+          "explanation": "Sinusoidal signalning diskret modeli.",
+          "python_code": "img = (127.5 + 100 * np.cos(2 * np.pi * 0.3125 * n))[None, :].repeat(512, 0)"
+        },
+        {
+          "formula": "f_{Nyquist}=\\frac{1}{2}",
+          "explanation": "Diskret signalda aliasing chegarasi Nyquist chastotasi bilan belgilanadi.",
+          "python_code": "f_Nyquist = 0.5"
+        },
+        {
+          "formula": "f_{alias}=|f-k|",
+          "explanation": "Samplingdan keyin chastota Nyquist intervaliga qayta xaritalanadi.",
+          "python_code": "f1, a1 = dominant_freq(sl[0])"
+        }
+      ],
+      "expected_output": "--- task 19 ---\noriginal: f=0.3125 A=100.00;  slicing ::4: f=0.2500 A=100.00;  INTER_AREA: f=0.2500 A=21.26 (theory 21.26)\ncos(2pi*0.7n) == cos(2pi*0.3n) on samples: True",
+      "topic_ids": [
+        3
+      ],
+      "examples": [
+        {
+          "title": "M01 — Camera / yuklangan rasm",
+          "description": "m01_camera/data/left01.jpg fayli asosida olingan rasm.",
+          "image": "uploads/m01/left01.jpg"
+        },
+        {
+          "title": "M02 — Digital / natijaviy rasm",
+          "description": "m02_digital dasturida hosil qilingan demosaicing namunasi.",
+          "image": "uploads/m02/t20_demosaic_crop.png"
+        }
+      ],
+      "example_runners": [
+        {
+          "key": "m01",
+          "title": "M01 — Camera",
+          "description": "m01_camera.zip ichidagi solutions.py ni ishga tushiradi va out/ hamda data/ rasmlarini ko‘rsatadi."
+        },
+        {
+          "key": "m02",
+          "title": "M02 — Digital",
+          "description": "m02_digital.zip ichidagi solutions.py ni ishga tushiradi va out/ rasmlarini ko‘rsatadi."
+        }
+      ]
+    }
+  }
+}
